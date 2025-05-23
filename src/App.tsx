@@ -10,6 +10,10 @@ import Dashboard from "@/pages/Dashboard";
 import Categories from "@/pages/Categories";
 import Utilisateurs from "@/pages/Utilisateurs";
 import Emplacements from "@/pages/Emplacements";
+import Clients from "@/pages/Clients";
+import Fournisseurs from "@/pages/Fournisseurs";
+import Receptions from "@/pages/Receptions";
+import Stock from "@/pages/Stock";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

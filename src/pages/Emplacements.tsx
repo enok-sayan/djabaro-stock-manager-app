@@ -1,43 +1,47 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Warehouse, Store, Archive } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Warehouse, Store, Package } from 'lucide-react';
 
 const Emplacements: React.FC = () => {
-  const emplacements = [
-    {
-      id: 1,
-      name: 'Dépôt Principal',
-      description: 'Entrepôt principal pour le stockage en gros',
+  const [emplacements] = useState([
+    { 
+      id: 1, 
+      name: 'Dépôt Principal', 
+      type: 'Entrepôt',
+      address: 'Zone Industrielle, Abidjan',
+      capacity: 1000,
+      occupied: 750,
       icon: Warehouse,
-      capacity: 5000,
-      occupied: 3750,
-      address: 'Zone Industrielle, Abidjan'
+      status: 'Actif'
     },
-    {
-      id: 2,
-      name: 'Boutique Vitrine',
-      description: 'Magasin de vente au détail',
+    { 
+      id: 2, 
+      name: 'Boutique Vitrine', 
+      type: 'Magasin',
+      address: 'Avenue Houphouët-Boigny, Cocody',
+      capacity: 200,
+      occupied: 180,
       icon: Store,
-      capacity: 800,
-      occupied: 650,
-      address: 'Plateau, Abidjan'
+      status: 'Actif'
     },
-    {
-      id: 3,
-      name: 'Entrepôt Secondaire',
-      description: 'Stock de sécurité et overflow',
-      icon: Archive,
-      capacity: 2000,
-      occupied: 1200,
-      address: 'Yopougon, Abidjan'
-    }
-  ];
+    { 
+      id: 3, 
+      name: 'Entrepôt Secondaire', 
+      type: 'Entrepôt',
+      address: 'Yopougon, Abidjan',
+      capacity: 500,
+      occupied: 320,
+      icon: Package,
+      status: 'Actif'
+    },
+  ]);
 
   const getOccupancyColor = (percentage: number) => {
-    if (percentage > 90) return 'text-red-600';
-    if (percentage > 75) return 'text-orange-600';
+    if (percentage >= 90) return 'text-red-600';
+    if (percentage >= 75) return 'text-orange-600';
     return 'text-green-600';
   };
 
@@ -48,50 +52,68 @@ const Emplacements: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Emplacements</h1>
           <p className="text-gray-600 mt-2">Organisation des zones physiques de stockage</p>
         </div>
-        <Badge variant="outline" className="text-primary border-primary">
-          {emplacements.length} emplacements
-        </Badge>
+        <Button className="bg-primary hover:bg-primary-600">
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvel emplacement
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {emplacements.map((emplacement) => {
-          const occupancyPercentage = (emplacement.occupied / emplacement.capacity) * 100;
+          const occupancyPercentage = Math.round((emplacement.occupied / emplacement.capacity) * 100);
           
           return (
             <Card key={emplacement.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <emplacement.icon className="h-8 w-8 text-primary" />
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <emplacement.icon className="w-7 h-7 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{emplacement.name}</CardTitle>
+                      <Badge variant="secondary" className="mt-1">
+                        {emplacement.type}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button variant="ghost" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-600">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <CardTitle className="text-lg">{emplacement.name}</CardTitle>
-                <CardDescription>{emplacement.description}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Adresse :</p>
-                    <p className="text-sm font-medium">{emplacement.address}</p>
+              <CardContent className="space-y-4">
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span className="text-sm">{emplacement.address}</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Occupation</span>
+                    <span className={getOccupancyColor(occupancyPercentage)}>
+                      {emplacement.occupied}/{emplacement.capacity} ({occupancyPercentage}%)
+                    </span>
                   </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Occupation</span>
-                      <span className={getOccupancyColor(occupancyPercentage)}>
-                        {occupancyPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${occupancyPercentage}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {emplacement.occupied} / {emplacement.capacity} articles
-                    </p>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        occupancyPercentage >= 90 ? 'bg-red-500' :
+                        occupancyPercentage >= 75 ? 'bg-orange-500' : 'bg-green-500'
+                      }`}
+                      style={{ width: `${occupancyPercentage}%` }}
+                    ></div>
                   </div>
                 </div>
+
+                <Badge variant={emplacement.status === 'Actif' ? 'default' : 'secondary'}>
+                  {emplacement.status}
+                </Badge>
               </CardContent>
             </Card>
           );
