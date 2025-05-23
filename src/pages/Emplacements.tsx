@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Plus, Edit, Trash2, Warehouse, Store, Package } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Warehouse, Store, Package, Eye } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const Emplacements: React.FC = () => {
-  const [emplacements] = useState([
+  const [emplacements, setEmplacements] = useState([
     { 
       id: 1, 
       name: 'Dépôt Principal', 
@@ -38,6 +39,22 @@ const Emplacements: React.FC = () => {
       status: 'Actif'
     },
   ]);
+
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    emplacementId: number | null;
+  }>({ isOpen: false, emplacementId: null });
+
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ isOpen: true, emplacementId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.emplacementId) {
+      setEmplacements(emplacements.filter(emp => emp.id !== deleteDialog.emplacementId));
+    }
+    setDeleteDialog({ isOpen: false, emplacementId: null });
+  };
 
   const getOccupancyColor = (percentage: number) => {
     if (percentage >= 90) return 'text-red-600';
@@ -79,9 +96,17 @@ const Emplacements: React.FC = () => {
                   </div>
                   <div className="flex space-x-1">
                     <Button variant="ghost" size="sm">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600"
+                      onClick={() => handleDelete(emplacement.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -119,6 +144,14 @@ const Emplacements: React.FC = () => {
           );
         })}
       </div>
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, emplacementId: null })}
+        onConfirm={confirmDelete}
+        title="Supprimer l'emplacement"
+        description="Êtes-vous sûr de vouloir supprimer cet emplacement ? Cette action est irréversible."
+      />
     </div>
   );
 };

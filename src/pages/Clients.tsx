@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserCheck, Plus, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { UserCheck, Plus, Edit, Trash2, Phone, Mail, MapPin, Eye } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const Clients: React.FC = () => {
-  const [clients] = useState([
+  const [clients, setClients] = useState([
     {
       id: 1,
       name: 'Kouakou Jean',
@@ -41,6 +42,22 @@ const Clients: React.FC = () => {
       status: 'Inactif'
     }
   ]);
+
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    clientId: number | null;
+  }>({ isOpen: false, clientId: null });
+
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ isOpen: true, clientId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.clientId) {
+      setClients(clients.filter(client => client.id !== deleteDialog.clientId));
+    }
+    setDeleteDialog({ isOpen: false, clientId: null });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -105,9 +122,17 @@ const Clients: React.FC = () => {
                   </Badge>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDelete(client.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -117,6 +142,14 @@ const Clients: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, clientId: null })}
+        onConfirm={confirmDelete}
+        title="Supprimer le client"
+        description="Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible."
+      />
     </div>
   );
 };

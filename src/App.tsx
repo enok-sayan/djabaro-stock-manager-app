@@ -14,6 +14,10 @@ import Clients from "@/pages/Clients";
 import Fournisseurs from "@/pages/Fournisseurs";
 import Receptions from "@/pages/Receptions";
 import Stock from "@/pages/Stock";
+import Expedition from "@/pages/Expedition";
+import Societe from "@/pages/Societe";
+import Rapport from "@/pages/Rapport";
+import Sauvegarde from "@/pages/Sauvegarde";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,66 +53,42 @@ const App = () => (
             } />
             <Route path="/clients" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Clients</h1>
-                  <p className="text-gray-600 mt-2">Gestion de la clientèle Djabaro</p>
-                </div>
+                <Clients />
               </ProtectedRoute>
             } />
             <Route path="/fournisseurs" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Fournisseurs</h1>
-                  <p className="text-gray-600 mt-2">Gestion des partenaires fournisseurs d'articles électroniques</p>
-                </div>
+                <Fournisseurs />
               </ProtectedRoute>
             } />
             <Route path="/receptions" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Réceptions</h1>
-                  <p className="text-gray-600 mt-2">Saisie des nouvelles livraisons reçues (Samsung, Apple, JBL, etc.)</p>
-                </div>
+                <Receptions />
               </ProtectedRoute>
             } />
             <Route path="/stock" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">État de Stock</h1>
-                  <p className="text-gray-600 mt-2">Consultation en temps réel des quantités disponibles</p>
-                </div>
+                <Stock />
               </ProtectedRoute>
             } />
             <Route path="/expedition" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Expédition</h1>
-                  <p className="text-gray-600 mt-2">Suivi des produits sortants et livraisons clients</p>
-                </div>
+                <Expedition />
               </ProtectedRoute>
             } />
             <Route path="/societe" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Société</h1>
-                  <p className="text-gray-600 mt-2">Paramètres globaux de l'entreprise Djabaro</p>
-                </div>
+                <Societe />
               </ProtectedRoute>
             } />
             <Route path="/rapport" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Rapports</h1>
-                  <p className="text-gray-600 mt-2">Génération automatique de rapports périodiques</p>
-                </div>
+                <Rapport />
               </ProtectedRoute>
             } />
             <Route path="/sauvegarde" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Sauvegarde BD</h1>
-                  <p className="text-gray-600 mt-2">Sauvegarde et restauration de la base de données</p>
-                </div>
+                <Sauvegarde />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

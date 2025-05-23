@@ -2,15 +2,32 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, Plus, Edit, Trash2, Smartphone, Headphones, Laptop, Cable } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Smartphone, Headphones, Laptop, Cable, Eye } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const Categories: React.FC = () => {
-  const [categories] = useState([
+  const [categories, setCategories] = useState([
     { id: 1, name: 'Téléphones', description: 'Smartphones et téléphones portables', icon: Smartphone, count: 45 },
     { id: 2, name: 'Casques Audio', description: 'Casques et écouteurs de qualité', icon: Headphones, count: 32 },
     { id: 3, name: 'Ordinateurs', description: 'Ordinateurs portables et accessoires', icon: Laptop, count: 18 },
     { id: 4, name: 'Accessoires', description: 'Câbles, chargeurs et étuis', icon: Cable, count: 67 },
   ]);
+
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    categoryId: number | null;
+  }>({ isOpen: false, categoryId: null });
+
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ isOpen: true, categoryId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.categoryId) {
+      setCategories(categories.filter(cat => cat.id !== deleteDialog.categoryId));
+    }
+    setDeleteDialog({ isOpen: false, categoryId: null });
+  };
 
   return (
     <div className="space-y-6">
@@ -41,9 +58,17 @@ const Categories: React.FC = () => {
                 </div>
                 <div className="flex space-x-1">
                   <Button variant="ghost" size="sm">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm">
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-red-600">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600"
+                    onClick={() => handleDelete(category.id)}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -55,6 +80,14 @@ const Categories: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, categoryId: null })}
+        onConfirm={confirmDelete}
+        title="Supprimer la catégorie"
+        description="Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible."
+      />
     </div>
   );
 };

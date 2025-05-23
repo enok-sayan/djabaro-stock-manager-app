@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Plus, Edit, Trash2, Phone, Mail, Globe, Star } from 'lucide-react';
+import { Truck, Plus, Edit, Trash2, Phone, Mail, Globe, Star, Eye } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const Fournisseurs: React.FC = () => {
-  const [fournisseurs] = useState([
+  const [fournisseurs, setFournisseurs] = useState([
     {
       id: 1,
       name: 'Samsung Electronics CI',
@@ -56,6 +57,22 @@ const Fournisseurs: React.FC = () => {
       status: 'Inactif'
     }
   ]);
+
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    fournisseurId: number | null;
+  }>({ isOpen: false, fournisseurId: null });
+
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ isOpen: true, fournisseurId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.fournisseurId) {
+      setFournisseurs(fournisseurs.filter(f => f.id !== deleteDialog.fournisseurId));
+    }
+    setDeleteDialog({ isOpen: false, fournisseurId: null });
+  };
 
   const getReliabilityColor = (reliability: string) => {
     switch (reliability) {
@@ -133,9 +150,17 @@ const Fournisseurs: React.FC = () => {
                   </Badge>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDelete(fournisseur.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -145,6 +170,14 @@ const Fournisseurs: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, fournisseurId: null })}
+        onConfirm={confirmDelete}
+        title="Supprimer le fournisseur"
+        description="Êtes-vous sûr de vouloir supprimer ce fournisseur ? Cette action est irréversible."
+      />
     </div>
   );
 };
