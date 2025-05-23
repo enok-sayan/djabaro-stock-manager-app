@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
+import Categories from "@/pages/Categories";
+import Utilisateurs from "@/pages/Utilisateurs";
+import Emplacements from "@/pages/Emplacements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,33 +30,24 @@ const App = () => (
             } />
             <Route path="/categories" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Catégories</h1>
-                  <p className="text-gray-600 mt-2">Gestion des catégories de produits</p>
-                </div>
+                <Categories />
               </ProtectedRoute>
             } />
             <Route path="/utilisateurs" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Utilisateurs</h1>
-                  <p className="text-gray-600 mt-2">Gestion des utilisateurs du système</p>
-                </div>
+                <Utilisateurs />
               </ProtectedRoute>
             } />
             <Route path="/emplacements" element={
               <ProtectedRoute>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold">Emplacements</h1>
-                  <p className="text-gray-600 mt-2">Gestion des emplacements de stockage</p>
-                </div>
+                <Emplacements />
               </ProtectedRoute>
             } />
             <Route path="/clients" element={
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Clients</h1>
-                  <p className="text-gray-600 mt-2">Gestion de la clientèle</p>
+                  <p className="text-gray-600 mt-2">Gestion de la clientèle Djabaro</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -61,7 +55,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Fournisseurs</h1>
-                  <p className="text-gray-600 mt-2">Gestion des fournisseurs</p>
+                  <p className="text-gray-600 mt-2">Gestion des partenaires fournisseurs d'articles électroniques</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -69,7 +63,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Réceptions</h1>
-                  <p className="text-gray-600 mt-2">Gestion des réceptions de marchandises</p>
+                  <p className="text-gray-600 mt-2">Saisie des nouvelles livraisons reçues (Samsung, Apple, JBL, etc.)</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -77,7 +71,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">État de Stock</h1>
-                  <p className="text-gray-600 mt-2">Suivi en temps réel des stocks</p>
+                  <p className="text-gray-600 mt-2">Consultation en temps réel des quantités disponibles</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -85,7 +79,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Expédition</h1>
-                  <p className="text-gray-600 mt-2">Gestion des expéditions</p>
+                  <p className="text-gray-600 mt-2">Suivi des produits sortants et livraisons clients</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -93,7 +87,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Société</h1>
-                  <p className="text-gray-600 mt-2">Paramètres de l'entreprise</p>
+                  <p className="text-gray-600 mt-2">Paramètres globaux de l'entreprise Djabaro</p>
                 </div>
               </ProtectedRoute>
             } />
@@ -101,7 +95,7 @@ const App = () => (
               <ProtectedRoute>
                 <div className="p-6">
                   <h1 className="text-2xl font-bold">Rapports</h1>
-                  <p className="text-gray-600 mt-2">Rapports et statistiques</p>
+                  <p className="text-gray-600 mt-2">Génération automatique de rapports périodiques</p>
                 </div>
               </ProtectedRoute>
             } />

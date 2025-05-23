@@ -11,7 +11,9 @@ import {
   ShoppingCart,
   Truck,
   BarChart3,
-  Clock
+  Clock,
+  MapPin,
+  Building
 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
@@ -24,14 +26,15 @@ const Dashboard: React.FC = () => {
     totalUsers: 45,
     pendingOrders: 12,
     monthlyRevenue: 156700,
-    activeSuppliers: 8
+    activeSuppliers: 8,
+    locations: 3
   };
 
   const recentActivities = [
-    { id: 1, action: 'Nouvelle réception', item: 'iPhone 15 Pro', quantity: 50, time: '2h' },
-    { id: 2, action: 'Stock faible', item: 'AirPods Pro', quantity: 5, time: '4h' },
-    { id: 3, action: 'Expédition', item: 'Samsung Galaxy S24', quantity: 15, time: '6h' },
-    { id: 4, action: 'Nouveau client', item: 'Client Premium', quantity: 1, time: '8h' },
+    { id: 1, action: 'Nouvelle réception', item: 'iPhone 15 Pro - 50 unités', brand: 'Apple', time: '2h' },
+    { id: 2, action: 'Stock faible', item: 'AirPods Pro - 5 unités restantes', brand: 'Apple', time: '4h' },
+    { id: 3, action: 'Expédition', item: 'Samsung Galaxy S24 - 15 unités', brand: 'Samsung', time: '6h' },
+    { id: 4, action: 'Nouveau client', item: 'Client Premium enregistré', brand: '', time: '8h' },
   ];
 
   const getGreeting = () => {
@@ -45,28 +48,28 @@ const Dashboard: React.FC = () => {
     switch (user?.role) {
       case 'Admin':
         return {
-          title: 'Vue d\'ensemble administrative',
-          description: 'Gestion complète du système Djabaro'
+          title: 'Administration Djabaro',
+          description: 'Gestion complète du système de commerce électronique'
         };
       case 'Manager':
         return {
-          title: 'Tableau de bord managérial',
-          description: 'Supervision des opérations et performances'
+          title: 'Management Djabaro',
+          description: 'Supervision des opérations commerciales'
         };
       case 'Employé':
         return {
-          title: 'Espace de travail',
-          description: 'Gestion quotidienne des stocks'
+          title: 'Espace Employé',
+          description: 'Gestion quotidienne des stocks et commandes'
         };
       case 'Client':
         return {
-          title: 'Mon espace client',
-          description: 'Suivi de vos commandes et historique'
+          title: 'Mon espace Djabaro',
+          description: 'Découvrez nos produits électroniques'
         };
       default:
         return {
-          title: 'Dashboard',
-          description: 'Bienvenue sur Djabaro'
+          title: 'Dashboard Djabaro',
+          description: 'Commerce d\'électronique - Côte d\'Ivoire'
         };
     }
   };
@@ -124,23 +127,21 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {user?.role !== 'Client' && (
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Utilisateurs actifs</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-500">{stats.totalUsers}</div>
-              <p className="text-xs text-gray-600">+3 ce mois</p>
-            </CardContent>
-          </Card>
-        )}
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Emplacements</CardTitle>
+            <MapPin className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-500">{stats.locations}</div>
+            <p className="text-xs text-gray-600">Zones de stockage actives</p>
+          </CardContent>
+        </Card>
 
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {user?.role === 'Client' ? 'Mes commandes' : 'Commandes en attente'}
+              {user?.role === 'Client' ? 'Mes commandes' : 'Commandes actives'}
             </CardTitle>
             <ShoppingCart className="h-4 w-4 text-green-500" />
           </CardHeader>
@@ -151,7 +152,7 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Recent Activities */}
+      {/* Recent Activities & Company Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -170,9 +171,13 @@ const Dashboard: React.FC = () => {
                   <div>
                     <p className="font-medium text-gray-900">{activity.action}</p>
                     <p className="text-sm text-gray-600">{activity.item}</p>
+                    {activity.brand && (
+                      <Badge variant="outline" className="mt-1 text-xs">
+                        {activity.brand}
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-primary">{activity.quantity}</p>
                     <p className="text-xs text-gray-500">Il y a {activity.time}</p>
                   </div>
                 </div>
@@ -181,59 +186,45 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
+        {/* Company Info */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              Actions rapides
+              <Building className="h-5 w-5 text-primary" />
+              À propos de Djabaro
             </CardTitle>
             <CardDescription>
-              Raccourcis vers les fonctions principales
+              Informations sur l'entreprise
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              {user?.role !== 'Client' && (
-                <>
-                  <button className="p-4 bg-primary/10 rounded-lg text-center hover:bg-primary/20 transition-colors">
-                    <Package className="h-6 w-6 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-primary">Nouveau produit</p>
-                  </button>
-                  <button className="p-4 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
-                    <Truck className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-blue-600">Réception</p>
-                  </button>
-                </>
-              )}
-              <button className="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors">
-                <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-green-600">Rapport</p>
-              </button>
-              <button className="p-4 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
-                <AlertTriangle className="h-6 w-6 text-orange-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-orange-600">Alertes</p>
-              </button>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-primary text-lg">DJABARO</h3>
+                <p className="text-sm text-gray-600">Commerce d'équipements électroniques</p>
+                <p className="text-sm text-gray-600">📍 Côte d'Ivoire</p>
+              </div>
+              
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-800">Nos spécialités :</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-sm text-gray-600">• Casques audio</div>
+                  <div className="text-sm text-gray-600">• Écouteurs</div>
+                  <div className="text-sm text-gray-600">• Téléphones portables</div>
+                  <div className="text-sm text-gray-600">• Ordinateurs portables</div>
+                  <div className="text-sm text-gray-600">• Accessoires (câbles, chargeurs, étuis)</div>
+                  <div className="text-sm text-gray-600">• Accessoires gaming</div>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-600">📞 05 05 05 05 05</p>
+                <p className="text-sm text-gray-600">📧 Djabaro@gmail.com</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Company Info Footer */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-primary">DJABARO</h3>
-              <p className="text-sm text-gray-600">Commerce d'équipements électroniques - Côte d'Ivoire</p>
-            </div>
-            <div className="text-right text-sm text-gray-600">
-              <p>📞 05 05 05 05 05</p>
-              <p>📧 Djabaro@gmail.com</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

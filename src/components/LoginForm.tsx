@@ -46,7 +46,7 @@ const LoginForm: React.FC = () => {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-primary">DJABARO</h1>
-          <p className="text-gray-600">Gestion de Stock - Électronique</p>
+          <p className="text-gray-600">Commerce d'Électronique - Côte d'Ivoire</p>
           
           {/* Decorative icons */}
           <div className="flex justify-center space-x-4 text-primary-300">
@@ -62,7 +62,7 @@ const LoginForm: React.FC = () => {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center text-gray-800">Connexion</CardTitle>
             <CardDescription className="text-center">
-              Accédez à votre espace de gestion
+              Accédez à votre espace Djabaro
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -112,7 +112,7 @@ const LoginForm: React.FC = () => {
 
             {/* Test Accounts Info */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Comptes de test :</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Comptes de test disponibles :</h4>
               <div className="text-xs text-gray-600 space-y-1">
                 <p><strong>Admin:</strong> admin@djabaro.ci / admin123</p>
                 <p><strong>Employé:</strong> employe@djabaro.ci / employe123</p>
@@ -125,7 +125,7 @@ const LoginForm: React.FC = () => {
 
         {/* Company Info */}
         <div className="text-center text-sm text-gray-500">
-          <p>Djabaro - Commerce d'électronique</p>
+          <p><strong>Djabaro</strong> - Commerce d'équipements électroniques</p>
           <p>📞 05 05 05 05 05 | 📧 Djabaro@gmail.com</p>
           <p>Côte d'Ivoire</p>
         </div>

@@ -47,10 +47,11 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { user, logout } = useAuth();
   const currentPath = location.pathname;
+  const collapsed = state === 'collapsed';
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive 
@@ -62,7 +63,7 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -76,7 +77,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div>
               <h2 className="text-lg font-bold text-primary">DJABARO</h2>
-              <p className="text-xs text-gray-500">Gestion de Stock</p>
+              <p className="text-xs text-gray-500">Commerce d'électronique</p>
             </div>
           )}
         </div>
