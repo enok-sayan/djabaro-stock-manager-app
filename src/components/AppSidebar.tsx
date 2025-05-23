@@ -51,7 +51,10 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const currentPath = location.pathname;
-  const collapsed = state === 'collapsed';
+  
+  // The 'collapsed' property does not exist on SidebarContext
+  // Let's derive it from the state instead
+  const isCollapsed = state === 'collapsed';
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive 
@@ -63,7 +66,7 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
+    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -74,14 +77,14 @@ export function AppSidebar() {
               className="w-6 h-6 object-contain filter brightness-0 invert"
             />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <h2 className="text-lg font-bold text-primary">DJABARO</h2>
               <p className="text-xs text-gray-500">Commerce d'électronique</p>
             </div>
           )}
         </div>
-        {!collapsed && user && (
+        {!isCollapsed && user && (
           <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
             <p className="font-medium text-gray-800">{user.firstName} {user.lastName}</p>
             <p className="text-xs text-gray-600">{user.role}</p>
@@ -99,7 +102,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="w-5 h-5 flex-shrink-0" />
-                      {!collapsed && <span className="ml-3">{item.title}</span>}
+                      {!isCollapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,7 +120,7 @@ export function AppSidebar() {
           className="w-full justify-start text-gray-600 hover:text-red-600 hover:bg-red-50"
         >
           <LogOut className="w-5 h-5" />
-          {!collapsed && <span className="ml-3">Déconnexion</span>}
+          {!isCollapsed && <span className="ml-3">Déconnexion</span>}
         </Button>
       </div>
 
