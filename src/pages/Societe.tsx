@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Building, Mail, Phone, MapPin, Globe, Save } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 
 const Societe: React.FC = () => {
+  const { toast } = useToast();
   const [companyInfo, setCompanyInfo] = useState({
     name: 'DJABARO SARL',
     email: 'contact@djabaro.ci',
@@ -29,7 +31,12 @@ const Societe: React.FC = () => {
 
   const handleSave = () => {
     console.log('Informations sauvegardées:', companyInfo);
-    // Ici vous pouvez ajouter la logique de sauvegarde
+    // Simulation de sauvegarde réussie
+    toast({
+      title: "Sauvegardé avec succès",
+      description: "Les informations de l'entreprise ont été mises à jour.",
+      duration: 3000
+    });
   };
 
   return (

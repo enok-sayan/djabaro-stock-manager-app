@@ -5,8 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PackageOpen, Plus, Eye, CheckCircle, Clock, Package, Edit, Trash2 } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from "@/components/ui/use-toast";
 
 const Receptions: React.FC = () => {
+  const { toast } = useToast();
   const [receptions, setReceptions] = useState([
     {
       id: 1,
@@ -54,6 +66,18 @@ const Receptions: React.FC = () => {
     receptionId: number | null;
   }>({ isOpen: false, receptionId: null });
 
+  const [newReceptionDialog, setNewReceptionDialog] = useState(false);
+  const [newReception, setNewReception] = useState({
+    reference: '',
+    fournisseur: '',
+    date: new Date().toISOString().split('T')[0],
+    status: 'En attente',
+    emplacement: 'Dépôt Principal',
+    productName: '',
+    quantity: 1,
+    unitPrice: 0
+  });
+
   const handleDelete = (id: number) => {
     setDeleteDialog({ isOpen: true, receptionId: id });
   };
@@ -61,8 +85,62 @@ const Receptions: React.FC = () => {
   const confirmDelete = () => {
     if (deleteDialog.receptionId) {
       setReceptions(receptions.filter(r => r.id !== deleteDialog.receptionId));
+      toast({
+        title: "Réception supprimée",
+        description: "La réception a été supprimée avec succès.",
+        duration: 3000
+      });
     }
     setDeleteDialog({ isOpen: false, receptionId: null });
+  };
+
+  const handleAddReception = () => {
+    if (!newReception.reference || !newReception.fournisseur || !newReception.productName) {
+      toast({
+        title: "Erreur",
+        description: "Tous les champs marqués d'un * sont requis.",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
+    const newId = Math.max(...receptions.map(r => r.id), 0) + 1;
+    const newReceptionItem = {
+      id: newId,
+      reference: newReception.reference,
+      fournisseur: newReception.fournisseur,
+      date: newReception.date,
+      status: newReception.status,
+      items: [{
+        product: newReception.productName,
+        quantity: Number(newReception.quantity),
+        unitPrice: Number(newReception.unitPrice)
+      }],
+      total: Number(newReception.quantity) * Number(newReception.unitPrice),
+      emplacement: newReception.emplacement
+    };
+
+    setReceptions([...receptions, newReceptionItem]);
+    
+    setNewReception({
+      reference: '',
+      fournisseur: '',
+      date: new Date().toISOString().split('T')[0],
+      status: 'En attente',
+      emplacement: 'Dépôt Principal',
+      productName: '',
+      quantity: 1,
+      unitPrice: 0
+    });
+    
+    setNewReceptionDialog(false);
+    
+    toast({
+      title: "Réception ajoutée",
+      description: "La nouvelle réception a été ajoutée avec succès.",
+      duration: 3000
+    });
   };
 
   const getStatusIcon = (status: string) => {
@@ -98,7 +176,7 @@ const Receptions: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Réceptions</h1>
           <p className="text-gray-600 mt-2">Saisie des nouvelles livraisons reçues (Samsung, Apple, JBL, etc.)</p>
         </div>
-        <Button className="bg-primary hover:bg-primary-600">
+        <Button className="bg-primary hover:bg-primary-600" onClick={() => setNewReceptionDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle réception
         </Button>
@@ -188,6 +266,132 @@ const Receptions: React.FC = () => {
         title="Supprimer la réception"
         description="Êtes-vous sûr de vouloir supprimer cette réception ? Cette action est irréversible."
       />
+
+      <Dialog open={newReceptionDialog} onOpenChange={setNewReceptionDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter une nouvelle réception</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="reference" className="text-right">
+                Référence *
+              </Label>
+              <Input
+                id="reference"
+                value={newReception.reference}
+                onChange={(e) => setNewReception({...newReception, reference: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="fournisseur" className="text-right">
+                Fournisseur *
+              </Label>
+              <Input
+                id="fournisseur"
+                value={newReception.fournisseur}
+                onChange={(e) => setNewReception({...newReception, fournisseur: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="date" className="text-right">
+                Date
+              </Label>
+              <Input
+                id="date"
+                type="date"
+                value={newReception.date}
+                onChange={(e) => setNewReception({...newReception, date: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Statut
+              </Label>
+              <Select 
+                value={newReception.status} 
+                onValueChange={(value) => setNewReception({...newReception, status: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="En attente">En attente</SelectItem>
+                  <SelectItem value="En cours">En cours</SelectItem>
+                  <SelectItem value="Réceptionné">Réceptionné</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="emplacement" className="text-right">
+                Emplacement
+              </Label>
+              <Select 
+                value={newReception.emplacement} 
+                onValueChange={(value) => setNewReception({...newReception, emplacement: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner un emplacement" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dépôt Principal">Dépôt Principal</SelectItem>
+                  <SelectItem value="Boutique Vitrine">Boutique Vitrine</SelectItem>
+                  <SelectItem value="Entrepôt Secondaire">Entrepôt Secondaire</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4 mt-2">
+              <h3 className="font-medium mb-2">Produit</h3>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="productName" className="text-right">
+                Nom *
+              </Label>
+              <Input
+                id="productName"
+                value={newReception.productName}
+                onChange={(e) => setNewReception({...newReception, productName: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="quantity" className="text-right">
+                Quantité
+              </Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                value={newReception.quantity}
+                onChange={(e) => setNewReception({...newReception, quantity: Number(e.target.value)})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="unitPrice" className="text-right">
+                Prix unitaire
+              </Label>
+              <Input
+                id="unitPrice"
+                type="number"
+                min="0"
+                value={newReception.unitPrice}
+                onChange={(e) => setNewReception({...newReception, unitPrice: Number(e.target.value)})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewReceptionDialog(false)}>Annuler</Button>
+            <Button onClick={handleAddReception}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

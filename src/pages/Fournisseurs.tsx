@@ -5,8 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Truck, Plus, Edit, Trash2, Phone, Mail, Globe, Star, Eye } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from "@/components/ui/use-toast";
 
 const Fournisseurs: React.FC = () => {
+  const { toast } = useToast();
   const [fournisseurs, setFournisseurs] = useState([
     {
       id: 1,
@@ -63,6 +75,17 @@ const Fournisseurs: React.FC = () => {
     fournisseurId: number | null;
   }>({ isOpen: false, fournisseurId: null });
 
+  const [newFournisseurDialog, setNewFournisseurDialog] = useState(false);
+  const [newFournisseur, setNewFournisseur] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    website: '',
+    speciality: '',
+    reliability: 'Bon',
+    status: 'Actif'
+  });
+
   const handleDelete = (id: number) => {
     setDeleteDialog({ isOpen: true, fournisseurId: id });
   };
@@ -70,8 +93,57 @@ const Fournisseurs: React.FC = () => {
   const confirmDelete = () => {
     if (deleteDialog.fournisseurId) {
       setFournisseurs(fournisseurs.filter(f => f.id !== deleteDialog.fournisseurId));
+      toast({
+        title: "Fournisseur supprimé",
+        description: "Le fournisseur a été supprimé avec succès.",
+        duration: 3000
+      });
     }
     setDeleteDialog({ isOpen: false, fournisseurId: null });
+  };
+
+  const handleAddFournisseur = () => {
+    if (newFournisseur.name.trim() === '' || newFournisseur.email.trim() === '') {
+      toast({
+        title: "Erreur",
+        description: "Le nom et l'email du fournisseur sont requis.",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
+    const newId = Math.max(...fournisseurs.map(f => f.id), 0) + 1;
+    setFournisseurs([...fournisseurs, {
+      id: newId,
+      name: newFournisseur.name,
+      email: newFournisseur.email,
+      phone: newFournisseur.phone,
+      website: newFournisseur.website,
+      speciality: newFournisseur.speciality,
+      rating: 3,
+      totalOrders: 0,
+      reliability: newFournisseur.reliability,
+      status: newFournisseur.status
+    }]);
+    
+    setNewFournisseur({
+      name: '',
+      email: '',
+      phone: '',
+      website: '',
+      speciality: '',
+      reliability: 'Bon',
+      status: 'Actif'
+    });
+    
+    setNewFournisseurDialog(false);
+    
+    toast({
+      title: "Fournisseur ajouté",
+      description: "Le nouveau fournisseur a été ajouté avec succès.",
+      duration: 3000
+    });
   };
 
   const getReliabilityColor = (reliability: string) => {
@@ -101,7 +173,7 @@ const Fournisseurs: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Fournisseurs</h1>
           <p className="text-gray-600 mt-2">Gestion des partenaires fournisseurs d'articles électroniques</p>
         </div>
-        <Button className="bg-primary hover:bg-primary-600">
+        <Button className="bg-primary hover:bg-primary-600" onClick={() => setNewFournisseurDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nouveau fournisseur
         </Button>
@@ -178,6 +250,111 @@ const Fournisseurs: React.FC = () => {
         title="Supprimer le fournisseur"
         description="Êtes-vous sûr de vouloir supprimer ce fournisseur ? Cette action est irréversible."
       />
+
+      <Dialog open={newFournisseurDialog} onOpenChange={setNewFournisseurDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter un nouveau fournisseur</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Nom
+              </Label>
+              <Input
+                id="name"
+                value={newFournisseur.name}
+                onChange={(e) => setNewFournisseur({...newFournisseur, name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={newFournisseur.email}
+                onChange={(e) => setNewFournisseur({...newFournisseur, email: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Téléphone
+              </Label>
+              <Input
+                id="phone"
+                value={newFournisseur.phone}
+                onChange={(e) => setNewFournisseur({...newFournisseur, phone: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="website" className="text-right">
+                Site web
+              </Label>
+              <Input
+                id="website"
+                value={newFournisseur.website}
+                onChange={(e) => setNewFournisseur({...newFournisseur, website: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="speciality" className="text-right">
+                Spécialité
+              </Label>
+              <Input
+                id="speciality"
+                value={newFournisseur.speciality}
+                onChange={(e) => setNewFournisseur({...newFournisseur, speciality: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="reliability" className="text-right">
+                Fiabilité
+              </Label>
+              <Select 
+                value={newFournisseur.reliability} 
+                onValueChange={(value) => setNewFournisseur({...newFournisseur, reliability: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner la fiabilité" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Excellent">Excellent</SelectItem>
+                  <SelectItem value="Très bon">Très bon</SelectItem>
+                  <SelectItem value="Bon">Bon</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Statut
+              </Label>
+              <Select 
+                value={newFournisseur.status} 
+                onValueChange={(value) => setNewFournisseur({...newFournisseur, status: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Actif">Actif</SelectItem>
+                  <SelectItem value="Inactif">Inactif</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewFournisseurDialog(false)}>Annuler</Button>
+            <Button onClick={handleAddFournisseur}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

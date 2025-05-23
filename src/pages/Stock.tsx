@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Package, AlertTriangle, TrendingUp, Search } from 'lucide-react';
+import { BarChart3, Package, AlertTriangle, TrendingUp, Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useToast } from "@/components/ui/use-toast";
 
 const Stock: React.FC = () => {
+  const { toast } = useToast();
   const [stockItems] = useState([
     {
       id: 1,
@@ -90,6 +92,29 @@ const Stock: React.FC = () => {
   const alertItems = stockItems.filter(item => item.quantite <= item.seuilAlerte).length;
   const totalItems = stockItems.reduce((sum, item) => sum + item.quantite, 0);
 
+  const handleExport = () => {
+    // Simulation d'export
+    toast({
+      title: "Export réussi",
+      description: "Le fichier d'état de stock a été téléchargé avec succès.",
+      duration: 3000
+    });
+    
+    console.log('Exporting stock state to CSV/Excel...');
+    
+    // En conditions réelles, ici on générerait un fichier CSV ou Excel
+    // et on provoquerait son téléchargement
+    
+    // Simulation de téléchargement pour l'exemple
+    const dummyLink = document.createElement('a');
+    dummyLink.setAttribute('download', `etat_stock_${new Date().toISOString().split('T')[0]}.csv`);
+    dummyLink.setAttribute('href', 'data:text/plain;charset=utf-8,Produit,Catégorie,Emplacement,Quantité,Prix Unitaire,Valeur Stock');
+    dummyLink.style.display = 'none';
+    document.body.appendChild(dummyLink);
+    dummyLink.click();
+    document.body.removeChild(dummyLink);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -169,7 +194,8 @@ const Stock: React.FC = () => {
             className="pl-10"
           />
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleExport}>
+          <Download className="w-4 h-4 mr-2" />
           Exporter
         </Button>
       </div>

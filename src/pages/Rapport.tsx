@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Calendar, BarChart3, TrendingUp, Package } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 
 const Rapport: React.FC = () => {
-  const [rapports] = useState([
+  const { toast } = useToast();
+  const [rapports, setRapports] = useState([
     {
       id: 1,
       type: 'Ventes mensuel',
@@ -45,7 +47,50 @@ const Rapport: React.FC = () => {
 
   const generateReport = (type: string) => {
     console.log(`Génération du rapport: ${type}`);
-    // Ici vous ajouteriez la logique de génération de rapport
+    
+    const newDate = new Date();
+    const formattedDate = newDate.toISOString();
+    
+    const newReport = {
+      id: Math.max(...rapports.map(r => r.id), 0) + 1,
+      type: type === 'ventes' ? 'Ventes mensuel' : 
+            type === 'stock' ? 'Stock critique' : 'Performance fournisseurs',
+      periode: newDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+      dateGeneration: formattedDate,
+      taille: `${Math.random() * 3 + 0.5}.${Math.floor(Math.random() * 9)}`,
+      status: 'Généré',
+      description: type === 'ventes' ? 'Rapport détaillé des ventes du mois' : 
+                  type === 'stock' ? 'Liste des produits en rupture ou proche de la rupture' :
+                  'Évaluation des fournisseurs sur la période'
+    };
+    
+    setRapports([newReport, ...rapports]);
+    
+    toast({
+      title: "Rapport généré",
+      description: `Le rapport de ${newReport.type} a été généré avec succès.`,
+      duration: 3000
+    });
+  };
+
+  const handleDownload = (reportId: number) => {
+    const report = rapports.find(r => r.id === reportId);
+    if (!report) return;
+    
+    toast({
+      title: "Téléchargement démarré",
+      description: `Le rapport ${report.type} est en cours de téléchargement.`,
+      duration: 3000
+    });
+    
+    // Simulation de téléchargement pour l'exemple
+    const dummyLink = document.createElement('a');
+    dummyLink.setAttribute('download', `rapport_${report.type.toLowerCase().replace(' ', '_')}_${report.periode.toLowerCase().replace(' ', '_')}.pdf`);
+    dummyLink.setAttribute('href', 'data:application/pdf;charset=utf-8,');
+    dummyLink.style.display = 'none';
+    document.body.appendChild(dummyLink);
+    dummyLink.click();
+    document.body.removeChild(dummyLink);
   };
 
   return (
@@ -178,7 +223,7 @@ const Rapport: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <Badge variant="default">{rapport.status}</Badge>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleDownload(rapport.id)}>
                     <Download className="w-4 h-4 mr-1" />
                     Télécharger
                   </Button>

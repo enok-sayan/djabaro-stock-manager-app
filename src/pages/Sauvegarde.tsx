@@ -4,9 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Database, Download, Upload, RefreshCw, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Sauvegarde: React.FC = () => {
-  const [sauvegardes] = useState([
+  const { toast } = useToast();
+  const [sauvegardes, setSauvegardes] = useState([
     {
       id: 1,
       nom: 'sauvegarde_auto_20240120.sql',
@@ -38,13 +50,40 @@ const Sauvegarde: React.FC = () => {
 
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [configDialog, setConfigDialog] = useState(false);
+  const [configValues, setConfigValues] = useState({
+    frequency: 'quotidienne',
+    time: '02:00',
+    retention: '30'
+  });
+
+  const [uploadDialog, setUploadDialog] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   const handleBackup = async () => {
     setIsBackingUp(true);
     // Simulation d'une sauvegarde
     await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const newBackup = {
+      id: Math.max(...sauvegardes.map(s => s.id), 0) + 1,
+      nom: `sauvegarde_manuelle_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.sql`,
+      type: 'Manuelle',
+      date: new Date().toISOString(),
+      taille: `${Math.floor(Math.random() * 50) + 140} MB`,
+      status: 'Complète',
+      description: 'Sauvegarde manuelle'
+    };
+    
+    setSauvegardes([newBackup, ...sauvegardes]);
     setIsBackingUp(false);
     console.log('Sauvegarde terminée');
+    
+    toast({
+      title: "Sauvegarde terminée",
+      description: "La base de données a été sauvegardée avec succès.",
+      duration: 3000
+    });
   };
 
   const handleRestore = async (filename: string) => {
@@ -53,6 +92,74 @@ const Sauvegarde: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 5000));
     setIsRestoring(false);
     console.log(`Restauration de ${filename} terminée`);
+    
+    toast({
+      title: "Restauration terminée",
+      description: `La base de données a été restaurée à partir de ${filename}.`,
+      duration: 3000
+    });
+  };
+
+  const handleDownload = (backupId: number) => {
+    const backup = sauvegardes.find(s => s.id === backupId);
+    if (!backup) return;
+    
+    toast({
+      title: "Téléchargement démarré",
+      description: `La sauvegarde ${backup.nom} est en cours de téléchargement.`,
+      duration: 3000
+    });
+    
+    // Simulation de téléchargement
+    const dummyLink = document.createElement('a');
+    dummyLink.setAttribute('download', backup.nom);
+    dummyLink.setAttribute('href', 'data:application/octet-stream;charset=utf-8,');
+    dummyLink.style.display = 'none';
+    document.body.appendChild(dummyLink);
+    dummyLink.click();
+    document.body.removeChild(dummyLink);
+  };
+
+  const handleConfigSave = () => {
+    toast({
+      title: "Configuration sauvegardée",
+      description: `Les sauvegardes automatiques seront effectuées ${configValues.frequency} à ${configValues.time}.`,
+      duration: 3000
+    });
+    setConfigDialog(false);
+  };
+
+  const handleUpload = () => {
+    if (!uploadFile) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un fichier à importer.",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+    
+    toast({
+      title: "Fichier importé",
+      description: `Le fichier ${uploadFile.name} a été importé avec succès.`,
+      duration: 3000
+    });
+    
+    // Ajouter la sauvegarde importée à la liste
+    const newBackup = {
+      id: Math.max(...sauvegardes.map(s => s.id), 0) + 1,
+      nom: uploadFile.name,
+      type: 'Importée',
+      date: new Date().toISOString(),
+      taille: `${Math.round(uploadFile.size / (1024 * 1024))} MB`,
+      status: 'Complète',
+      description: 'Sauvegarde importée manuellement'
+    };
+    
+    setSauvegardes([newBackup, ...sauvegardes]);
+    setUploadDialog(false);
+    setUploadFile(null);
   };
 
   const getStatusIcon = (status: string) => {
@@ -122,7 +229,7 @@ const Sauvegarde: React.FC = () => {
             </div>
             <h3 className="font-semibold mb-2">Importer sauvegarde</h3>
             <p className="text-sm text-gray-600 mb-4">Télécharger un fichier de sauvegarde</p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={() => setUploadDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Importer
             </Button>
@@ -136,7 +243,7 @@ const Sauvegarde: React.FC = () => {
             </div>
             <h3 className="font-semibold mb-2">Configuration auto</h3>
             <p className="text-sm text-gray-600 mb-4">Paramétrer les sauvegardes automatiques</p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={() => setConfigDialog(true)}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Configurer
             </Button>
@@ -198,7 +305,7 @@ const Sauvegarde: React.FC = () => {
                     <span className="ml-1">{sauvegarde.status}</span>
                   </Badge>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleDownload(sauvegarde.id)}>
                       <Download className="w-4 h-4 mr-1" />
                       Télécharger
                     </Button>
@@ -222,6 +329,97 @@ const Sauvegarde: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Configuration Dialog */}
+      <Dialog open={configDialog} onOpenChange={setConfigDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Configuration des sauvegardes automatiques</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="frequency" className="text-right">
+                Fréquence
+              </Label>
+              <Select 
+                value={configValues.frequency} 
+                onValueChange={(value) => setConfigValues({...configValues, frequency: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionner la fréquence" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quotidienne">Quotidienne</SelectItem>
+                  <SelectItem value="hebdomadaire">Hebdomadaire</SelectItem>
+                  <SelectItem value="mensuelle">Mensuelle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="time" className="text-right">
+                Heure
+              </Label>
+              <Input
+                id="time"
+                type="time"
+                value={configValues.time}
+                onChange={(e) => setConfigValues({...configValues, time: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="retention" className="text-right">
+                Rétention (jours)
+              </Label>
+              <Input
+                id="retention"
+                type="number"
+                min="1"
+                value={configValues.retention}
+                onChange={(e) => setConfigValues({...configValues, retention: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfigDialog(false)}>Annuler</Button>
+            <Button onClick={handleConfigSave}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Dialog */}
+      <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Importer une sauvegarde</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="file">Fichier de sauvegarde (.sql)</Label>
+              <Input
+                id="file"
+                type="file"
+                accept=".sql,.db"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setUploadFile(e.target.files[0]);
+                  }
+                }}
+              />
+              {uploadFile && (
+                <p className="text-sm text-gray-500">
+                  Fichier sélectionné: {uploadFile.name} ({Math.round(uploadFile.size / 1024)} KB)
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadDialog(false)}>Annuler</Button>
+            <Button onClick={handleUpload}>Importer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
