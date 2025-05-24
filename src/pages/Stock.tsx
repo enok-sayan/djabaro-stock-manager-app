@@ -1,118 +1,178 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Package, AlertTriangle, TrendingUp, Search, Download } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Package, Plus, Edit, Trash2, Eye, Download, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from '@/hooks/use-toast';
+import MaterialForm from '@/components/MaterialForm';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
+import { Material } from '@/types/database';
 
 const Stock: React.FC = () => {
   const { toast } = useToast();
-  const [stockItems] = useState([
+  const [searchTerm, setSearchTerm] = useState('');
+  const [materials, setMaterials] = useState<Material[]>([
     {
       id: 1,
-      product: 'Samsung Galaxy S24',
-      category: 'Téléphones',
-      emplacement: 'Dépôt Principal',
-      quantite: 25,
-      seuilAlerte: 10,
-      prixUnitaire: 450000,
-      valeurStock: 11250000,
-      derniereEntree: '2024-01-20'
+      name: 'iPhone 15 Pro Max',
+      description: 'Smartphone Apple dernière génération',
+      serial_number: 'APL001234567',
+      quantity: 25,
+      available: true,
+      purchase_date: '2024-01-15',
+      purchase_price: 850000,
+      category: { id: 1, name: 'Téléphones' },
+      status: { id: 1, name: 'Neuf' },
+      supplier: { id: 1, name: 'TechSupply SARL' },
+      manufacturer: { id: 1, name: 'Apple', country: 'USA' }
     },
     {
       id: 2,
-      product: 'iPhone 15 Pro',
-      category: 'Téléphones',
-      emplacement: 'Boutique Vitrine',
-      quantite: 8,
-      seuilAlerte: 15,
-      prixUnitaire: 650000,
-      valeurStock: 5200000,
-      derniereEntree: '2024-01-18'
+      name: 'Samsung Galaxy S24 Ultra',
+      description: 'Smartphone Samsung haut de gamme',
+      serial_number: 'SAM998877665',
+      quantity: 15,
+      available: true,
+      purchase_date: '2024-02-10',
+      purchase_price: 780000,
+      category: { id: 1, name: 'Téléphones' },
+      status: { id: 1, name: 'Neuf' },
+      supplier: { id: 2, name: 'ElectroDistrib' },
+      manufacturer: { id: 2, name: 'Samsung', country: 'Corée du Sud' }
     },
     {
       id: 3,
-      product: 'JBL Tune 760NC',
-      category: 'Casques Audio',
-      emplacement: 'Dépôt Principal',
-      quantite: 45,
-      seuilAlerte: 20,
-      prixUnitaire: 45000,
-      valeurStock: 2025000,
-      derniereEntree: '2024-01-19'
-    },
-    {
-      id: 4,
-      product: 'MacBook Air M3',
-      category: 'Ordinateurs',
-      emplacement: 'Entrepôt Secondaire',
-      quantite: 3,
-      seuilAlerte: 5,
-      prixUnitaire: 850000,
-      valeurStock: 2550000,
-      derniereEntree: '2024-01-15'
-    },
-    {
-      id: 5,
-      product: 'Câble USB-C',
-      category: 'Accessoires',
-      emplacement: 'Boutique Vitrine',
-      quantite: 120,
-      seuilAlerte: 50,
-      prixUnitaire: 3500,
-      valeurStock: 420000,
-      derniereEntree: '2024-01-22'
+      name: 'MacBook Pro M3',
+      description: 'Ordinateur portable Apple avec puce M3',
+      serial_number: 'MAC2024001',
+      quantity: 8,
+      available: true,
+      purchase_date: '2024-03-05',
+      purchase_price: 1200000,
+      category: { id: 3, name: 'Ordinateurs' },
+      status: { id: 1, name: 'Neuf' },
+      supplier: { id: 1, name: 'TechSupply SARL' },
+      manufacturer: { id: 1, name: 'Apple', country: 'USA' }
     }
   ]);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | undefined>();
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    materialId: number | null;
+  }>({ isOpen: false, materialId: null });
 
-  const filteredStock = stockItems.filter(item =>
-    item.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredMaterials = materials.filter(material =>
+    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.serial_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.category?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStockStatus = (quantite: number, seuil: number) => {
-    if (quantite === 0) return { status: 'Rupture', color: 'bg-red-100 text-red-800' };
-    if (quantite <= seuil) return { status: 'Alerte', color: 'bg-orange-100 text-orange-800' };
-    return { status: 'Disponible', color: 'bg-green-100 text-green-800' };
+  const handleCreate = () => {
+    setFormMode('create');
+    setSelectedMaterial(undefined);
+    setIsFormOpen(true);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      minimumFractionDigits: 0,
-    }).format(amount);
+  const handleEdit = (material: Material) => {
+    setFormMode('edit');
+    setSelectedMaterial(material);
+    setIsFormOpen(true);
   };
 
-  const totalValue = stockItems.reduce((sum, item) => sum + item.valeurStock, 0);
-  const alertItems = stockItems.filter(item => item.quantite <= item.seuilAlerte).length;
-  const totalItems = stockItems.reduce((sum, item) => sum + item.quantite, 0);
+  const handleView = (material: Material) => {
+    toast({
+      title: "Détails du matériel",
+      description: `${material.name} - Quantité: ${material.quantity}`,
+    });
+  };
+
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ isOpen: true, materialId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.materialId) {
+      setMaterials(materials.filter(m => m.id !== deleteDialog.materialId));
+      toast({
+        title: "Matériel supprimé",
+        description: "Le matériel a été supprimé avec succès.",
+        duration: 3000
+      });
+    }
+    setDeleteDialog({ isOpen: false, materialId: null });
+  };
 
   const handleExport = () => {
-    // Simulation d'export
+    const csvData = materials.map(material => ({
+      Nom: material.name,
+      'Numéro de série': material.serial_number || '',
+      Quantité: material.quantity,
+      'Prix d\'achat': material.purchase_price || '',
+      Catégorie: material.category?.name || '',
+      Statut: material.status?.name || '',
+      Fournisseur: material.supplier?.name || '',
+      Fabricant: material.manufacturer?.name || ''
+    }));
+
+    const csvContent = [
+      Object.keys(csvData[0]).join(';'),
+      ...csvData.map(row => Object.values(row).join(';'))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `stock_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     toast({
       title: "Export réussi",
-      description: "Le fichier d'état de stock a été téléchargé avec succès.",
-      duration: 3000
+      description: "Les données de stock ont été exportées avec succès.",
     });
-    
-    console.log('Exporting stock state to CSV/Excel...');
-    
-    // En conditions réelles, ici on générerait un fichier CSV ou Excel
-    // et on provoquerait son téléchargement
-    
-    // Simulation de téléchargement pour l'exemple
-    const dummyLink = document.createElement('a');
-    dummyLink.setAttribute('download', `etat_stock_${new Date().toISOString().split('T')[0]}.csv`);
-    dummyLink.setAttribute('href', 'data:text/plain;charset=utf-8,Produit,Catégorie,Emplacement,Quantité,Prix Unitaire,Valeur Stock');
-    dummyLink.style.display = 'none';
-    document.body.appendChild(dummyLink);
-    dummyLink.click();
-    document.body.removeChild(dummyLink);
+  };
+
+  const handleFormSubmit = (data: Omit<Material, 'id'>) => {
+    if (formMode === 'create') {
+      const newMaterial = {
+        ...data,
+        id: Math.max(...materials.map(m => m.id), 0) + 1,
+      };
+      setMaterials([...materials, newMaterial]);
+      toast({
+        title: "Matériel créé",
+        description: `${data.name} a été ajouté avec succès.`,
+      });
+    } else if (selectedMaterial) {
+      setMaterials(materials.map(material => 
+        material.id === selectedMaterial.id 
+          ? { ...data, id: selectedMaterial.id }
+          : material
+      ));
+      toast({
+        title: "Matériel modifié",
+        description: `${data.name} a été mis à jour avec succès.`,
+      });
+    }
+    setIsFormOpen(false);
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case 'neuf': return 'bg-green-100 text-green-800';
+      case 'bon': return 'bg-blue-100 text-blue-800';
+      case 'usagé': return 'bg-yellow-100 text-yellow-800';
+      case 'défectueux': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -120,128 +180,99 @@ const Stock: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">État de Stock</h1>
-          <p className="text-gray-600 mt-2">Consultation en temps réel des quantités disponibles</p>
+          <p className="text-gray-600 mt-2">Gestion de l'inventaire des matériels électroniques</p>
+        </div>
+        <div className="flex space-x-2">
+          <Button onClick={handleExport} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Exporter
+          </Button>
+          <Button onClick={handleCreate} className="bg-primary hover:bg-primary-600">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau matériel
+          </Button>
         </div>
       </div>
 
-      {/* Statistiques générales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Articles</p>
-                <p className="text-2xl font-bold">{totalItems}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Valeur Stock</p>
-                <p className="text-xl font-bold">{formatCurrency(totalValue)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Alertes Stock</p>
-                <p className="text-2xl font-bold text-orange-600">{alertItems}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Produits</p>
-                <p className="text-2xl font-bold">{stockItems.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center space-x-2">
+        <Search className="w-5 h-5 text-gray-400" />
+        <Input
+          placeholder="Rechercher par nom, numéro de série ou catégorie..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
       </div>
 
-      {/* Barre de recherche */}
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Rechercher un produit..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Button variant="outline" onClick={handleExport}>
-          <Download className="w-4 h-4 mr-2" />
-          Exporter
-        </Button>
-      </div>
-
-      {/* Liste des articles en stock */}
-      <div className="space-y-4">
-        {filteredStock.map((item) => {
-          const stockStatus = getStockStatus(item.quantite, item.seuilAlerte);
-          
-          return (
-            <Card key={item.id}>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                  <div className="md:col-span-2">
-                    <h3 className="font-semibold text-lg">{item.product}</h3>
-                    <p className="text-sm text-gray-600">{item.category}</p>
-                    <p className="text-xs text-gray-500">{item.emplacement}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredMaterials.map((material) => (
+          <Card key={material.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Package className="w-6 h-6 text-primary" />
                   </div>
-                  
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{item.quantite}</p>
-                    <p className="text-xs text-gray-500">En stock</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <Badge className={stockStatus.color}>
-                      {stockStatus.status}
-                    </Badge>
-                    <p className="text-xs text-gray-500 mt-1">Seuil: {item.seuilAlerte}</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="font-medium">{formatCurrency(item.prixUnitaire)}</p>
-                    <p className="text-xs text-gray-500">Prix unitaire</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="font-bold text-green-600">{formatCurrency(item.valeurStock)}</p>
-                    <p className="text-xs text-gray-500">Valeur totale</p>
+                  <div>
+                    <CardTitle className="text-lg">{material.name}</CardTitle>
+                    <p className="text-sm text-gray-600">Qté: {material.quantity}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <div className="flex space-x-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleView(material)}>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(material)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600"
+                    onClick={() => handleDelete(material.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-gray-600 line-clamp-2">{material.description}</p>
+              {material.serial_number && (
+                <p className="text-xs font-mono text-gray-500">SN: {material.serial_number}</p>
+              )}
+              <div className="flex items-center justify-between">
+                <Badge className={getStatusColor(material.status?.name)}>
+                  {material.status?.name || 'Non défini'}
+                </Badge>
+                <span className="text-sm font-semibold text-green-600">
+                  {material.purchase_price?.toLocaleString()} XOF
+                </span>
+              </div>
+              <div className="text-xs text-gray-500">
+                <p>Catégorie: {material.category?.name}</p>
+                <p>Fournisseur: {material.supplier?.name}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      <MaterialForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleFormSubmit}
+        material={selectedMaterial}
+        mode={formMode}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, materialId: null })}
+        onConfirm={confirmDelete}
+        title="Supprimer le matériel"
+        description="Êtes-vous sûr de vouloir supprimer ce matériel ? Cette action est irréversible."
+      />
     </div>
   );
 };
