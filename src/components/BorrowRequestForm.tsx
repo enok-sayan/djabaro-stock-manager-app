@@ -87,11 +87,15 @@ const BorrowRequestForm: React.FC<BorrowRequestFormProps> = ({
   }, [request, mode, form]);
 
   const handleSubmit = (data: BorrowRequestFormData) => {
-    const submitData = {
-      ...data,
+    const submitData: Omit<BorrowRequest, 'id'> = {
+      user_id: data.user_id,
+      material_id: data.material_id,
       request_date: new Date().toISOString(),
       start_date: data.start_date ? new Date(data.start_date).toISOString() : undefined,
       end_date: data.end_date ? new Date(data.end_date).toISOString() : undefined,
+      status: data.status,
+      purpose: data.purpose,
+      comments: data.comments,
     };
     onSubmit(submitData);
     form.reset();

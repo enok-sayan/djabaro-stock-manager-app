@@ -79,7 +79,14 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
   }, [supplier, mode, form]);
 
   const handleSubmit = (data: SupplierFormData) => {
-    onSubmit(data);
+    const submitData: Omit<Supplier, 'id'> = {
+      name: data.name,
+      contact_person: data.contact_person,
+      phone: data.phone,
+      email: data.email,
+      address: data.address,
+    };
+    onSubmit(submitData);
     form.reset();
     onClose();
   };

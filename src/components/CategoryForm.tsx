@@ -67,7 +67,11 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   }, [category, mode, form]);
 
   const handleSubmit = (data: CategoryFormData) => {
-    onSubmit(data);
+    const submitData: Omit<Category, 'id'> = {
+      name: data.name,
+      description: data.description,
+    };
+    onSubmit(submitData);
     form.reset();
     onClose();
   };

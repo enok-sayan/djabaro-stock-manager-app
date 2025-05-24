@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ const Receptions: React.FC = () => {
       status: 'PENDING',
       purpose: 'Démonstration client',
       comments: 'Besoin urgent pour présentation',
-      user: { id: 2, username: 'employe1', first_name: 'Jean', last_name: 'Kouassi' },
+      user: { id: 2, username: 'employe1', password: 'hidden', first_name: 'Jean', last_name: 'Kouassi' },
       material: { id: 1, name: 'iPhone 15 Pro Max', quantity: 25, available: true }
     },
     {
@@ -35,7 +34,7 @@ const Receptions: React.FC = () => {
       status: 'APPROVED',
       purpose: 'Test produit',
       comments: 'Validation technique nécessaire',
-      user: { id: 3, username: 'manager1', first_name: 'Marie', last_name: 'Ouattara' },
+      user: { id: 3, username: 'manager1', password: 'hidden', first_name: 'Marie', last_name: 'Ouattara' },
       material: { id: 2, name: 'Samsung Galaxy S24 Ultra', quantity: 15, available: true }
     },
     {
@@ -48,7 +47,7 @@ const Receptions: React.FC = () => {
       status: 'RETURNED',
       purpose: 'Formation équipe',
       comments: 'Formation sur nouveau produit',
-      user: { id: 4, username: 'client1', first_name: 'Ahmed', last_name: 'Traoré' },
+      user: { id: 4, username: 'client1', password: 'hidden', first_name: 'Ahmed', last_name: 'Traoré' },
       material: { id: 3, name: 'MacBook Pro M3', quantity: 8, available: true }
     }
   ]);

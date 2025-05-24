@@ -88,7 +88,16 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
   }, [material, mode, form]);
 
   const handleSubmit = (data: MaterialFormData) => {
-    onSubmit(data);
+    const submitData: Omit<Material, 'id'> = {
+      name: data.name,
+      description: data.description,
+      serial_number: data.serial_number,
+      quantity: data.quantity,
+      available: data.available,
+      purchase_date: data.purchase_date,
+      purchase_price: data.purchase_price,
+    };
+    onSubmit(submitData);
     form.reset();
     onClose();
   };
